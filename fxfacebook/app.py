@@ -55,6 +55,7 @@ async def clip(reel_id: str) -> fastapi.responses.HTMLResponse:
         <meta property="theme-color" content="#395898">
         <meta property="og:title" content="{post.description}">
         <meta property="og:type" content="video">
+        <meta property="og:site_name" content="Facebook Reels">
         <meta property="og:url" content="{post.source}">
         <meta property="og:video" content="{video_url}">
         <meta property="og:video:secure_url" content="{video_url}">
