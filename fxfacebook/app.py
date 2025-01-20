@@ -62,7 +62,7 @@ async def clip(reel_id: str) -> fastapi.responses.HTMLResponse:
     </head>
     
     <body>
-        <p>Redirecting you to the Twitch clip...</p>
+        <p>Redirecting you to the Facebook reel...</p>
         <p>If you are not redirected automatically, <a href="{post.source}">click here</a>.</p>
     </body>
     
