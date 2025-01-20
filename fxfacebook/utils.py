@@ -17,4 +17,4 @@ async def fetch_post_info(client: httpx.AsyncClient, *, url: str) -> PostInfo:
     api_url = f"https://vkrdownloader.xyz/server/?api_key={API_KEY}&vkr={url}"
     response = await client.get(api_url)
     data = response.json()
-    return PostInfo(**data)
+    return PostInfo(**data["data"])
