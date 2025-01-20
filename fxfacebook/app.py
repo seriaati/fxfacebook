@@ -37,7 +37,13 @@ async def clip(reel_id: str) -> fastapi.responses.HTMLResponse:
         post.description = "Facebook Video"
 
     if post.downloads:
-        video_url = await shorten_url(app.state.client, url=post.downloads[-1].url)
+        download = next(
+            (d for d in post.downloads if d.ext == "mp4" and "hd" in d.format_id), None
+        )
+        if download:
+            video_url = await shorten_url(app.state.client, url=download.url)
+        else:
+            return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
     else:
         return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
 
@@ -46,7 +52,7 @@ async def clip(reel_id: str) -> fastapi.responses.HTMLResponse:
     
     <head>
         <meta property="charset" content="utf-8">
-        <meta property="theme-color" content="#6441a5">
+        <meta property="theme-color" content="#395898">
         <meta property="og:title" content="{post.description}">
         <meta property="og:type" content="video">
         <meta property="og:url" content="{post.source}">
