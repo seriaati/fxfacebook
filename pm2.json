@@ -1,0 +1,9 @@
+{
+    "apps": [
+        {
+            "name": "fxfacebook",
+            "script": "./main.py",
+            "interpreter": "./.venv/bin/python"
+        }
+    ]
+}
