@@ -76,10 +76,10 @@ async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
 
 
 @app.get("/share/r/{reel_id}")
-async def share_reel(reel_id: str) -> fastapi.responses.RedirectResponse:
-    return fastapi.responses.RedirectResponse(f"https://www.facebook.com/share/r/{reel_id}")
+async def share_reel(reel_id: str) -> fastapi.responses.HTMLResponse:
+    return await embed_fixer(f"https://www.facebook.com/share/r/{reel_id}")
 
 
 @app.get("/reel/{reel_id}")
-async def reel(reel_id: str) -> fastapi.responses.RedirectResponse:
-    return fastapi.responses.RedirectResponse(f"https://www.facebook.com/reel/{reel_id}")
+async def reel(reel_id: str) -> fastapi.responses.HTMLResponse:
+    return await embed_fixer(f"https://www.facebook.com/reel/{reel_id}")
