@@ -24,11 +24,8 @@ def index() -> fastapi.responses.RedirectResponse:
     return fastapi.responses.RedirectResponse("https://github.com/seriaati/fxfacebook")
 
 
-@app.get("/share/r/{reel_id}")
-async def clip(reel_id: str) -> fastapi.responses.HTMLResponse:
-    post = await fetch_post_info(
-        app.state.client, url=f"https://www.facebook.com/share/r/{reel_id}"
-    )
+async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
+    post = await fetch_post_info(app.state.client, url=url)
 
     if post.error:
         return fastapi.responses.HTMLResponse(f"<p>{post.error}</p>")
@@ -76,3 +73,13 @@ async def clip(reel_id: str) -> fastapi.responses.HTMLResponse:
     </html>
     """
     return fastapi.responses.HTMLResponse(html)
+
+
+@app.get("/share/r/{reel_id}")
+async def share_reel(reel_id: str) -> fastapi.responses.RedirectResponse:
+    return fastapi.responses.RedirectResponse(f"https://www.facebook.com/{reel_id}")
+
+
+@app.get("/reel/{reel_id}")
+async def reel(reel_id: str) -> fastapi.responses.RedirectResponse:
+    return fastapi.responses.RedirectResponse(f"https://www.facebook.com/{reel_id}")
