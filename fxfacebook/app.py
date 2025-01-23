@@ -83,3 +83,21 @@ async def share_reel(reel_id: str) -> fastapi.responses.HTMLResponse:
 @app.get("/reel/{reel_id}")
 async def reel(reel_id: str) -> fastapi.responses.HTMLResponse:
     return await embed_fixer(f"https://www.facebook.com/reel/{reel_id}")
+
+
+@app.get("/share/v/{video_id}")
+async def share_video(video_id: str) -> fastapi.responses.HTMLResponse:
+    # Find the final url after redirection
+    response = await app.state.client.get(
+        f"https://www.facebook.com/share/v/{video_id}", follow_redirects=True
+    )
+    url = response.url
+    return await embed_fixer(url)
+
+
+@app.get("/watch")
+async def watch(request: fastapi.Request) -> fastapi.responses.HTMLResponse:
+    params = dict(request.query_params)
+    return await embed_fixer(
+        f"https://www.facebook.com/watch/?{'&'.join(f'{k}={v}' for k, v in params.items())}"
+    )
