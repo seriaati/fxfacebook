@@ -57,6 +57,8 @@ async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
         logger.error(f"No downloads found: {post}")
         return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
 
+    logger.info(f"Video URL: {video_url}")
+
     html = f"""
     <html>
     
