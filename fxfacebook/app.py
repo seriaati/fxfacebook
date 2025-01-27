@@ -2,20 +2,26 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 import fastapi
-import httpx
+import logging
+from aiohttp_client_cache.session import CachedSession
+from aiohttp_client_cache.backends.sqlite import SQLiteBackend
 
 from .utils import fetch_post_info, shorten_url
 
 
 @asynccontextmanager
 async def app_lifespan(app: fastapi.FastAPI) -> AsyncGenerator[None, None]:
-    app.state.client = httpx.AsyncClient()
+    app.state.client = CachedSession(
+        cache=SQLiteBackend(cache_name="cache.db", expire_after=3600),
+        headers={"User-Agent": "Mozilla/5.0"},
+    )
     try:
         yield
     finally:
-        await app.state.client.aclose()
+        await app.state.client.close()
 
 
+logger = logging.getLogger("uvicorn")
 app = fastapi.FastAPI(lifespan=app_lifespan)
 
 
@@ -25,7 +31,11 @@ def index() -> fastapi.responses.RedirectResponse:
 
 
 async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
-    post = await fetch_post_info(app.state.client, url=url)
+    try:
+        post = await fetch_post_info(app.state.client, url=url)
+    except Exception as e:
+        logger.exception(f"Error fetching post info")
+        return fastapi.responses.HTMLResponse(f"<p>Error fetching post info: {e}</p>")
 
     if post.error:
         return fastapi.responses.HTMLResponse(f"<p>{post.error}</p>")
@@ -40,8 +50,10 @@ async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
         if download:
             video_url = await shorten_url(app.state.client, url=download.url)
         else:
+            logger.error(f"No HD downloads found: {post}")
             return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
     else:
+        logger.error(f"No downloads found: {post}")
         return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
 
     html = f"""
@@ -88,10 +100,11 @@ async def reel(reel_id: str) -> fastapi.responses.HTMLResponse:
 @app.get("/share/v/{video_id}")
 async def share_video(video_id: str) -> fastapi.responses.HTMLResponse:
     # Find the final url after redirection
-    response = await app.state.client.get(
-        f"https://www.facebook.com/share/v/{video_id}", follow_redirects=True
-    )
-    url = response.url
+    async with app.state.client.get(
+        f"https://www.facebook.com/share/v/{video_id}"
+    ) as response:
+        url = response.url
+    logger.info(f"Final URL: {url}")
     return await embed_fixer(url)
 
 
