@@ -173,6 +173,15 @@ wheels = [
 ]
 
 [[package]]
+name = "fake-useragent"
+version = "2.0.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/a4/f8d204c20e7879c2c1fd1719095673f447a3111282bfe09c0a74a5ed5000/fake_useragent-2.0.3.tar.gz", hash = "sha256:af86a26ef8229efece8fed529b4aeb5b73747d889b60f01cd477b6f301df46e6", size = 194741 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/11/4f/a639b1dbdc557241e702eefb931ba24ba235c84f8fffdca3e272f096c6af/fake_useragent-2.0.3-py3-none-any.whl", hash = "sha256:8bae50abb72c309a5b3ae2f01a0b82426613fd5c4e2a04dca9332399ec44daa1", size = 201110 },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.114.0"
 source = { registry = "https://pypi.org/simple" }
@@ -246,6 +255,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "aiohttp-client-cache", extra = ["sqlite"] },
+    { name = "fake-useragent" },
     { name = "fastapi" },
     { name = "pydantic" },
     { name = "python-dotenv" },
@@ -255,6 +265,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aiohttp-client-cache", extras = ["sqlite"], specifier = ">=0.12.4" },
+    { name = "fake-useragent", specifier = ">=2.0.3" },
     { name = "fastapi", specifier = ">=0.114.0" },
     { name = "pydantic", specifier = ">=2.9.1" },
     { name = "python-dotenv", specifier = ">=1.0.1" },

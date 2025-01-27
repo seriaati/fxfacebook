@@ -5,6 +5,7 @@ import fastapi
 import logging
 from aiohttp_client_cache.session import CachedSession
 from aiohttp_client_cache.backends.sqlite import SQLiteBackend
+from fake_useragent import UserAgent
 
 from .utils import fetch_post_info, shorten_url
 
@@ -13,7 +14,6 @@ from .utils import fetch_post_info, shorten_url
 async def app_lifespan(app: fastapi.FastAPI) -> AsyncGenerator[None, None]:
     app.state.client = CachedSession(
         cache=SQLiteBackend(cache_name="cache.db", expire_after=3600),
-        headers={"User-Agent": "Mozilla/5.0"},
     )
     try:
         yield
@@ -21,6 +21,7 @@ async def app_lifespan(app: fastapi.FastAPI) -> AsyncGenerator[None, None]:
         await app.state.client.close()
 
 
+ua = UserAgent()
 logger = logging.getLogger("uvicorn")
 app = fastapi.FastAPI(lifespan=app_lifespan)
 
@@ -101,7 +102,8 @@ async def reel(reel_id: str) -> fastapi.responses.HTMLResponse:
 async def share_video(video_id: str) -> fastapi.responses.HTMLResponse:
     # Find the final url after redirection
     async with app.state.client.get(
-        f"https://www.facebook.com/share/v/{video_id}"
+        f"https://www.facebook.com/share/v/{video_id}",
+        headers={"User-Agent": ua.random},
     ) as response:
         url = response.url
     logger.info(f"Final URL: {url}")
