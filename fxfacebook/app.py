@@ -31,15 +31,15 @@ def index() -> fastapi.responses.RedirectResponse:
     return fastapi.responses.RedirectResponse("https://github.com/seriaati/fxfacebook")
 
 
-async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
+async def embed_fixer(url: str) -> fastapi.responses.Response:
     try:
         post = await fetch_post_info(app.state.client, url=url)
-    except Exception as e:
+    except Exception:
         logger.exception(f"Error fetching post info")
-        return fastapi.responses.HTMLResponse(f"<p>Error fetching post info: {e}</p>")
+        return fastapi.responses.RedirectResponse(url)
 
     if post.error:
-        return fastapi.responses.HTMLResponse(f"<p>{post.error}</p>")
+        return fastapi.responses.RedirectResponse(url)
 
     if not post.description:
         post.description = "Facebook Video"
@@ -52,10 +52,10 @@ async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
             video_url = await shorten_url(app.state.client, url=download.url)
         else:
             logger.error(f"No HD downloads found: {post}")
-            return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
+            return fastapi.responses.RedirectResponse(url)
     else:
         logger.error(f"No downloads found: {post}")
-        return fastapi.responses.HTMLResponse(f"<p>No video found</p>")
+        return fastapi.responses.RedirectResponse(url)
 
     logger.info(f"Video URL: {video_url}")
 
@@ -91,17 +91,17 @@ async def embed_fixer(url: str) -> fastapi.responses.HTMLResponse:
 
 
 @app.get("/share/r/{reel_id}")
-async def share_reel(reel_id: str) -> fastapi.responses.HTMLResponse:
+async def share_reel(reel_id: str) -> fastapi.responses.Response:
     return await embed_fixer(f"https://www.facebook.com/share/r/{reel_id}")
 
 
 @app.get("/reel/{reel_id}")
-async def reel(reel_id: str) -> fastapi.responses.HTMLResponse:
+async def reel(reel_id: str) -> fastapi.responses.Response:
     return await embed_fixer(f"https://www.facebook.com/reel/{reel_id}")
 
 
-@app.get("/share/v/{video_id}")
-async def share_video(video_id: str) -> fastapi.responses.HTMLResponse:
+@app.get("/share/v/{video_id}")  # NOTE: Unstable
+async def share_video(video_id: str) -> fastapi.responses.Response:
     # Find the final url after redirection
     async with app.state.client.get(
         f"https://www.facebook.com/share/v/{video_id}",
@@ -113,7 +113,7 @@ async def share_video(video_id: str) -> fastapi.responses.HTMLResponse:
 
 
 @app.get("/watch")
-async def watch(request: fastapi.Request) -> fastapi.responses.HTMLResponse:
+async def watch(request: fastapi.Request) -> fastapi.responses.Response:
     params = dict(request.query_params)
     return await embed_fixer(
         f"https://www.facebook.com/watch/?{'&'.join(f'{k}={v}' for k, v in params.items())}"
